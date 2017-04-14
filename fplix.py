@@ -69,11 +69,15 @@ def main():
         bots[i].x, bots[i].y = map(int, stdin.readline().split())
 
     while True:
+        # Actuator
+        print bot.chooseAction(board.state)
+
         # Update new board state from stdin
         board.update(stdin)
 
-        # Actuator
-        print bot.chooseAction(board.state)
+        # Update bot position
+        for i in range(n_players):
+            bots[i].x, bots[i].y = map(int, stdin.readline().split())
 
 
 if __name__ == '__main__':
