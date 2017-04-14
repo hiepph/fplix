@@ -1,5 +1,6 @@
 from sys import stdin
 import random
+import os
 
 # Hard-code values
 MOVES = [
@@ -69,9 +70,10 @@ def main():
         bots[i].x, bots[i].y = map(int, stdin.readline().split())
 
     # DEBUG
-    print ">>> OVERVIEW"
-    board.view()
-    print "MY bot: (%d, %d)" % (bot.x, bot.y)
+    if os.environ.get('DEBUG') == 'TRUE':
+        print ">>> OVERVIEW"
+        board.view()
+        print "MY bot: (%d, %d)" % (bot.x, bot.y)
 
     # EXAMPLE, loop 3 turns:
     for i in range(3):
