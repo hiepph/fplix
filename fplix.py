@@ -1,4 +1,4 @@
-from sys import stdin
+from sys import stdin, stdout
 import random
 
 # Hard-code values
@@ -68,18 +68,12 @@ def main():
     for i in range(n_players):
         bots[i].x, bots[i].y = map(int, stdin.readline().split())
 
-    # DEBUG
-    print ">>> OVERVIEW"
-    board.view()
-    print "MY bot: (%d, %d)" % (bot.x, bot.y)
+    while True:
+        # Update new board state from stdin
+        board.update(stdin)
 
-    # EXAMPLE, loop 3 turns:
-    for i in range(3):
-        # Update board state with stdin
-        # board.update(stdin)
-
-        print "> Turn %d" % (i + 1)
-        print "Bot move: %s" % bot.chooseAction(board.state)
+        # Actuator
+        print bot.chooseAction(board.state)
 
 
 if __name__ == '__main__':
