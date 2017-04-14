@@ -38,19 +38,12 @@ class Bot():
         self.x = x
         self.y = y
 
-        self.last_move = None
-
     # state: Board' state format a.k.a 2-d array
     def chooseAction(self, state):
         # magic here
 
         ## random for now
         move = random.choice(MOVES)
-        while move == self.last_move:
-            move = random.choice(MOVES)
-
-        # Prevent last move duplicated
-        self.last_move = move
 
         return move
 
