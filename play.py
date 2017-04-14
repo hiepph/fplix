@@ -70,7 +70,7 @@ def main():
         bots[i].x, bots[i].y = map(int, stdin.readline().split())
 
     # DEBUG
-    if os.environ[DEBUG] == 'TRUE':
+    if os.environ.get('DEBUG') == 'TRUE':
         print ">>> OVERVIEW"
         board.view()
         print "MY bot: (%d, %d)" % (bot.x, bot.y)
