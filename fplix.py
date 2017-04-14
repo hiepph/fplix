@@ -38,10 +38,19 @@ class Bot():
         self.x = x
         self.y = y
 
+        self.last_move = None
+
     # state: Board' state format a.k.a 2-d array
     def chooseAction(self, state):
         # magic here
-        move = random.choice(MOVES) # random for now
+
+        ## random for now
+        move = random.choice(MOVES)
+        while move == self.last_move:
+            move = random.choice(MOVES)
+
+        # Prevent last move duplicated
+        self.last_move = move
 
         return move
 
@@ -76,8 +85,8 @@ def main():
         board.update(stdin)
 
         # Update bot position
-        for i in range(n_players):
-            bots[i].x, bots[i].y = map(int, stdin.readline().split())
+        #for i in range(n_players):
+        #    bots[i].x, bots[i].y = map(int, stdin.readline().split())
 
 
 if __name__ == '__main__':
