@@ -11,6 +11,12 @@ MOVES = [
     'UP',       # 2
     'DOWN'      # 3
 ]
+FATAL_COUPLES = [
+    [0, 1],
+    [1, 0],
+    [2, 3],
+    [3, 2]
+]
 EPOCH = 1000
 W = 30
 H = 20
@@ -70,11 +76,19 @@ class Bot():
         self.x = x
         self.y = y
         self.score = 9
+        self.last_move = None
 
     # state: Board' state format a.k.a 2-d array
     def chooseAction(self, state, auto=True):
         if auto:
             move = random.choice(list(range(len(MOVES))))
+
+            # Prevent reversing
+            while [move, self.last_move] in FATAL_COUPLES:
+                move = random.choice(list(range(len(MOVES))))
+
+            # Update last move
+            self.last_move = move
         else:
             move = int(stdin.readline())
 
@@ -106,8 +120,8 @@ def main():
     ## TRAINING
     for i in range(EPOCH):
         # Actuator
-        #print bot.chooseAction(board.state)
-        print bot.chooseAction(board.state, False)
+        print bot.chooseAction(board.state)
+        #print bot.chooseAction(board.state, False)
 
         # Update world
         done = board.update(bot.x, bot.y)
