@@ -85,8 +85,8 @@ def main():
         board.update(stdin)
 
         # Update bot position
-        #for i in range(n_players):
-        #    bots[i].x, bots[i].y = map(int, stdin.readline().split())
+        for i in range(n_players):
+            bots[i].x, bots[i].y = map(int, stdin.readline().split())
 
 
 if __name__ == '__main__':
