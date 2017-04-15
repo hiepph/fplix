@@ -79,12 +79,12 @@ class Board():
         for h in range(x-size, x+size+1):
             y_view = []
 
-            if x < 0 or x > H:
+            if h < 0 or h >= H:
                 for _ in range(size * 2 + 1):
                     y_view.append(-1)
             else:
                 for w in range(y-size,y+size+1):
-                    if w < 0 or w > W:
+                    if w < 0 or w >= W:
                         y_view.append(-1)
                     else:
                         y_view.append(int(self.state[h][w]))
@@ -150,8 +150,8 @@ def main():
         print bot.chooseAction(board)
         #print bot.chooseAction(board.state, False)
         sight = bot.calcState(board)
-        for y in sight:
-            print ''.join(str(y))
+        for x in sight:
+            print x
 
         # Update world
         done = board.update(bot.x, bot.y)
