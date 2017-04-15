@@ -114,16 +114,33 @@ class Board():
 class Bot():
     def __init__(self, index, x=-1, y=-1):
         self.id = index
+        if self.id == 1:
+            self.stable = 1
+            self.unstable = 2
+        elif self.id == 2:
+            self.stable = 3
+            self.unstable = 4
+        elif self.id == 3:
+            self.stable = 5
+            self.unstable = 6
+        elif self.id == 4:
+            self.stable = 7
+            self.unstable = 8
         self.x = x
         self.y = y
         self.score = 9
-        self.last_move = None
+
+        # Q
+        self.q = Q(actions=range(len(MOVES)))
+        self.last_action = None
+        self.last_state = None
 
     def calcState(self, board):
         return board.radar(self.x, self.y)
 
     def learn(self, board):
         reward = board.reward(self.x, self.y)
+        #
 
 
     # state: Board' state format a.k.a 2-d array
@@ -134,7 +151,7 @@ class Bot():
             move = random.choice(list(range(len(MOVES))))
 
         # Prevent reversing
-        if [move, self.last_move] in FATAL_COUPLES:
+        if [move, self.last_action] in FATAL_COUPLES:
             return self.chooseAction(board, auto)
 
         # Update (x,y) of bot
@@ -148,7 +165,7 @@ class Bot():
             self.x += 1
 
         # Update last move
-        self.last_move = move
+        self.last_action = move
 
         return MOVES[move]
 
