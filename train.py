@@ -37,7 +37,6 @@ class Board():
             # game end
             return True
 
-        print "(%d, %d)" % (x, y)
         cell = self.state[x][y]
 
         # empty
@@ -48,8 +47,8 @@ class Board():
 
         elif cell == '1':
             # Update stable cells
-            for x in range(H):
-                line = ''.join(self.state[x])
+            for h in range(H):
+                line = ''.join(self.state[h])
                 if '2' in line:
                     if '1' in line:
                         start = min([line.index('1'), line.index('2')])
@@ -58,8 +57,8 @@ class Board():
                         start = line.index('2')
                         end = line.rindex('2')
 
-                    for y in range(start, end+1):
-                        self.state[x][y] = '1'
+                    for w in range(start, end+1):
+                        self.state[h][w] = '1'
 
         elif cell == '2':
             return True
@@ -68,6 +67,31 @@ class Board():
 
     def getPosition(self, x, y):
         return self.state[x][y]
+
+    def radar(self, x, y, size=3):
+        """Make a wrapped square overview of size (size+1, size+1)
+        Out of board should be -1
+        Return:
+            sight: 2-d array
+        """
+
+        sight = []
+        for h in range(x-size, x+size+1):
+            y_view = []
+
+            if x < 0 or x > H:
+                for _ in range(size * 2 + 1):
+                    y_view.append(-1)
+            else:
+                for w in range(y-size,y+size+1):
+                    if w < 0 or w > W:
+                        y_view.append(-1)
+                    else:
+                        y_view.append(int(self.state[h][w]))
+
+            sight.append(y_view)
+
+        return sight
 
 
 class Bot():
@@ -78,8 +102,11 @@ class Bot():
         self.score = 9
         self.last_move = None
 
+    def calcState(self, board):
+        return board.radar(self.x, self.y)
+
     # state: Board' state format a.k.a 2-d array
-    def chooseAction(self, state, auto=True):
+    def chooseAction(self, board, auto=True):
         if auto:
             move = random.choice(list(range(len(MOVES))))
 
@@ -120,8 +147,11 @@ def main():
     ## TRAINING
     for i in range(EPOCH):
         # Actuator
-        print bot.chooseAction(board.state)
+        print bot.chooseAction(board)
         #print bot.chooseAction(board.state, False)
+        sight = bot.calcState(board)
+        for y in sight:
+            print ''.join(str(y))
 
         # Update world
         done = board.update(bot.x, bot.y)
