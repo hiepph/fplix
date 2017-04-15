@@ -1,4 +1,5 @@
 from sys import stdin
+import sys
 import random
 import time
 import copy
@@ -209,7 +210,6 @@ def main():
         while not board.done:
             # Actuator
             print bot.chooseAction(board)
-            #print bot.q.q
 
             # Update world
             board.update(bot.x, bot.y)
@@ -221,6 +221,8 @@ def main():
             if board.done:
                 board.view()
                 print "GAME %d - %d turn(s)" % (e+1, turn)
+                #print "Q {%d KB}" % (sys.getsizeof(bot.q.q)/1024)
+                #print bot.q.q
 
             turn += 1
 

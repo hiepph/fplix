@@ -45,12 +45,13 @@ class Q:
             # recalculate max of Q
             maxQ = max(q)
 
+            # NOTE: Debug
+            sys.stdout.write("EXPLORE - ")
+
         count = q.count(maxQ)
         if count > 1:
             best = [i for i in range(len(self.actions)) if q[i] == maxQ]
             i = random.choice(best)
-            # NOTE: Debug
-            sys.stdout.write("RANDOM - ")
         else:
             i = q.index(maxQ)
 
