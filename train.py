@@ -17,7 +17,7 @@ FATAL_COUPLES = [
     [2, 3],
     [3, 2]
 ]
-EPOCH = 1000
+EPOCH = 1
 W = 30
 H = 20
 
@@ -25,6 +25,7 @@ H = 20
 class Board():
     def __init__(self):
         self.state = [[0 for y in range(W)] for x in range(H)]
+        self.done = False
 
     # Pretty print state
     def view(self):
@@ -35,7 +36,8 @@ class Board():
     def update(self, x, y):
         if not (x in range(H) and y in range(W)):
             # game end
-            return True
+            self.done = True
+            return
 
         cell = self.state[x][y]
 
@@ -61,9 +63,10 @@ class Board():
                         self.state[h][w] = '1'
 
         elif cell == '2':
-            return True
+            self.done = True
+            return
 
-        return False
+        self.done = False
 
     def getPosition(self, x, y):
         return self.state[x][y]
@@ -93,6 +96,20 @@ class Board():
 
         return sight
 
+    def reward(self, x, y):
+        if board.done:
+            # Fatal
+            return -1000
+
+        cell = self.state[x][y]
+        if cell == '1':
+            reward = -10
+        elif cell == '0':
+            reward = -1
+        else:
+            # Fatal
+            reward = -1000
+
 
 class Bot():
     def __init__(self, index, x=-1, y=-1):
@@ -105,19 +122,20 @@ class Bot():
     def calcState(self, board):
         return board.radar(self.x, self.y)
 
+    def learn(self, board):
+        reward = board.reward(self.x, self.y)
+
+
     # state: Board' state format a.k.a 2-d array
     def chooseAction(self, board, auto=True):
-        if auto:
+        if not auto:
+            move = int(stdin.readline())
+        else:
             move = random.choice(list(range(len(MOVES))))
 
-            # Prevent reversing
-            while [move, self.last_move] in FATAL_COUPLES:
-                move = random.choice(list(range(len(MOVES))))
-
-            # Update last move
-            self.last_move = move
-        else:
-            move = int(stdin.readline())
+        # Prevent reversing
+        if [move, self.last_move] in FATAL_COUPLES:
+            return self.chooseAction(board, auto)
 
         # Update (x,y) of bot
         if move == 0:
@@ -128,6 +146,9 @@ class Bot():
             self.x -= 1
         else:
             self.x += 1
+
+        # Update last move
+        self.last_move = move
 
         return MOVES[move]
 
@@ -145,19 +166,25 @@ def main():
     bot.x, bot.y = map(int, stdin.readline().split())
 
     ## TRAINING
-    for i in range(EPOCH):
-        # Actuator
-        print bot.chooseAction(board)
-        #print bot.chooseAction(board.state, False)
-        sight = bot.calcState(board)
-        for x in sight:
-            print x
+    for e in range(EPOCH):
+        done = False
+        turn = 1
 
-        # Update world
-        done = board.update(bot.x, bot.y)
-        board.view()
-        if done:
-            break
+        while not board.done:
+            # Actuator
+            print bot.chooseAction(board)
+
+            # Update world
+            board.update(bot.x, bot.y)
+            board.view()
+
+            # Bot learn
+            bot.learn(board)
+
+            if board.done:
+                print "GAME %d - %d turn(s)" % (e+1, turn)
+
+            turn += 1
 
     print "END"
 
