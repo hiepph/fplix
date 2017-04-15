@@ -14,12 +14,6 @@ MOVES = [
     'UP',       # 2
     'DOWN'      # 3
 ]
-FATAL_COUPLES = [
-    [0, 1],
-    [1, 0],
-    [2, 3],
-    [3, 2]
-]
 EPOCH = int(os.environ['EPOCH'])
 if EPOCH is None:
     EPOCH = 1000
@@ -157,6 +151,9 @@ class Bot():
         if self.last_state is not None:
             self.q.learn(self.last_state, self.last_action, reward, curr_state)
 
+        # update last state
+        self.last_state = curr_state
+
     # state: Board' state format a.k.a 2-d array
     def chooseAction(self, board, auto=True):
         if not auto:
@@ -164,13 +161,6 @@ class Bot():
         else:
             curr_state = board.calcState(self.x, self.y)
             move = self.q.chooseAction(curr_state)
-
-            # update last state
-            self.last_state = curr_state
-
-        if [move, self.last_action] in FATAL_COUPLES:
-            board.done = True
-            return MOVES[move]
 
         # Update (x,y) of bot
         if move == 0:
@@ -221,8 +211,10 @@ def main():
             if board.done:
                 board.view()
                 print "GAME %d - %d turn(s)" % (e+1, turn)
-                #print "Q {%d KB}" % (sys.getsizeof(bot.q.q)/1024)
-                #print bot.q.q
+                print "Q {%d KB}" % (sys.getsizeof(bot.q.q)/1024)
+                q = bot.q.q
+                for k, v in q.iteritems():
+                    print k, v
 
             turn += 1
 
