@@ -111,7 +111,7 @@ class Board():
         if cell == '1':
             reward = -10
         elif cell == '0':
-            reward = -1
+            reward = 1
         elif cell == '2':
             reward = -1000
 
@@ -177,6 +177,9 @@ class Bot():
             self.x -= 1
         else:
             self.x += 1
+
+        if [move, self.last_action] in FATAL_MOVES:
+            board.done = True
 
         # Update last move
         self.last_action = move

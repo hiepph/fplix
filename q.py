@@ -1,11 +1,5 @@
 import random
 import sys
-FATAL_MOVES = [
-    [0, 1],
-    [1, 0],
-    [2, 3],
-    [3, 2]
-]
 
 class Q:
     def __init__(self, actions, epsilon=0.1, alpha=0.2, gamma=0.9):
@@ -59,9 +53,6 @@ class Q:
             i = q.index(maxQ)
 
         action = self.actions[i]
-        if [action, last_action] in FATAL_MOVES:
-            return self.chooseAction(action, last_action)
-
         return action
 
     def learn(self, prev_state, prev_action, reward, curr_state):
