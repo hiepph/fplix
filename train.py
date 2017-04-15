@@ -1,6 +1,7 @@
 from sys import stdin
 import random
 import time
+import copy
 
 from q import Q
 
@@ -24,7 +25,7 @@ H = 20
 
 class Board():
     def __init__(self):
-        self.state = [[0 for y in range(W)] for x in range(H)]
+        self.state = [['0' for y in range(W)] for x in range(H)]
         self.done = False
 
     # Pretty print state
@@ -71,11 +72,9 @@ class Board():
     def getPosition(self, x, y):
         return self.state[x][y]
 
-    def radar(self, x, y, size=3):
+    def radar(self, x, y, size=2):
         """Make a wrapped square overview of size (size+1, size+1)
         Out of board should be -1
-        Return:
-            sight: 2-d array
         """
 
         sight = []
@@ -92,12 +91,12 @@ class Board():
                     else:
                         y_view.append(int(self.state[h][w]))
 
-            sight.append(y_view)
+            sight.append(tuple(y_view))
 
-        return sight
+        return tuple(sight)
 
     def reward(self, x, y):
-        if board.done:
+        if self.done:
             # Fatal
             return -1000
 
@@ -106,9 +105,10 @@ class Board():
             reward = -10
         elif cell == '0':
             reward = -1
-        else:
-            # Fatal
-            reward = -1000
+        elif cell == '2':
+            reward = -1
+
+        return reward
 
 
 class Bot():
@@ -135,20 +135,34 @@ class Bot():
         self.last_action = None
         self.last_state = None
 
+    def restart(self, x=-1, y=-1):
+        self.x = x
+        self.y = y
+        self.score = 9
+
+        self.last_action = None
+        self.last_state = None
+
     def calcState(self, board):
         return board.radar(self.x, self.y)
 
     def learn(self, board):
+        curr_state = self.calcState(board)
         reward = board.reward(self.x, self.y)
-        #
 
+        if self.last_state is not None:
+            self.q.learn(self.last_state, self.last_action, reward, curr_state)
 
     # state: Board' state format a.k.a 2-d array
     def chooseAction(self, board, auto=True):
         if not auto:
             move = int(stdin.readline())
         else:
-            move = random.choice(list(range(len(MOVES))))
+            curr_state = self.calcState(board)
+            move = self.q.chooseAction(curr_state)
+
+            # update last state
+            self.last_state = curr_state
 
         # Prevent reversing
         if [move, self.last_action] in FATAL_COUPLES:
@@ -171,34 +185,39 @@ class Bot():
 
 
 def main():
-    board = Board()
-
     ## WORLD MAKING
+    world = [['0' for y in range(W)] for x in range(H)]
     for i in range(H):
-        board.state[i] = list(stdin.readline()[:-1])
-    board.view()
+        world[i] = list(stdin.readline()[:-1])
+    world_x, world_y = map(int, stdin.readline().split())
 
-    ## RELEASE THE KRAKEN
+    ## Agent
     bot = Bot(1)
-    bot.x, bot.y = map(int, stdin.readline().split())
 
     ## TRAINING
     for e in range(EPOCH):
+        # Restart
+        board = Board()
+        board.state = copy.deepcopy(world)
+        bot.restart(world_x, world_y)
+
         done = False
         turn = 1
 
         while not board.done:
             # Actuator
             print bot.chooseAction(board)
+            print bot.q.q
 
             # Update world
             board.update(bot.x, bot.y)
-            board.view()
+            #board.view()
 
             # Bot learn
             bot.learn(board)
 
             if board.done:
+                print board.view()
                 print "GAME %d - %d turn(s)" % (e+1, turn)
 
             turn += 1
