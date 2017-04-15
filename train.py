@@ -14,6 +14,12 @@ MOVES = [
     'UP',       # 2
     'DOWN'      # 3
 ]
+FATAL_MOVES = [
+    [0, 1],
+    [1, 0],
+    [2, 3],
+    [3, 2]
+]
 EPOCH = int(os.environ['EPOCH'])
 if EPOCH is None:
     EPOCH = 1000
@@ -105,7 +111,7 @@ class Board():
         if cell == '1':
             reward = -10
         elif cell == '0':
-            reward = -1
+            reward = 1
         elif cell == '2':
             reward = -1000
 
@@ -160,7 +166,7 @@ class Bot():
             move = int(stdin.readline())
         else:
             curr_state = board.calcState(self.x, self.y)
-            move = self.q.chooseAction(curr_state)
+            move = self.q.chooseAction(curr_state, self.last_action)
 
         # Update (x,y) of bot
         if move == 0:
