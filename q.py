@@ -1,4 +1,5 @@
 import random
+import sys
 
 class Q:
     def __init__(self, actions, epsilon=0.1, alpha=0.2, gamma=0.9):
@@ -48,8 +49,8 @@ class Q:
         if count > 1:
             best = [i for i in range(len(self.actions)) if q[i] == maxQ]
             i = random.choice(best)
-            ## NOTE: Just for debug
-            print "(RANDOM)"
+            # NOTE: Debug
+            sys.stdout.write("RANDOM - ")
         else:
             i = q.index(maxQ)
 

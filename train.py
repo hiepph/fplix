@@ -2,6 +2,7 @@ from sys import stdin
 import random
 import time
 import copy
+import os
 
 from q import Q
 
@@ -18,14 +19,19 @@ FATAL_COUPLES = [
     [2, 3],
     [3, 2]
 ]
-EPOCH = 1
+EPOCH = int(os.environ['EPOCH'])
+if EPOCH is None:
+    EPOCH = 1000
 W = 30
 H = 20
 
 
 class Board():
-    def __init__(self):
-        self.state = [['0' for y in range(W)] for x in range(H)]
+    def __init__(self, world=None):
+        if world is None:
+            self.state = [['0' for y in range(W)] for x in range(H)]
+        else:
+            self.state = world
         self.done = False
 
     # Pretty print state
@@ -35,6 +41,9 @@ class Board():
 
     # Update state from (x, y) of bot
     def update(self, x, y):
+        if self.done:
+            return
+
         if not (x in range(H) and y in range(W)):
             # game end
             self.done = True
@@ -69,31 +78,28 @@ class Board():
 
         self.done = False
 
-    def getPosition(self, x, y):
+    def getCell(self, x, y):
+        if x not in range(H):
+            return '-1'
+        if y not in range(W):
+            return '-1'
+
         return self.state[x][y]
 
-    def radar(self, x, y, size=2):
-        """Make a wrapped square overview of size (size+1, size+1)
-        Out of board should be -1
+    def calcState(self, x, y, sight=2):
+        """Make an overview of surrounded environment
         """
 
-        sight = []
-        for h in range(x-size, x+size+1):
-            y_view = []
+        radar = []
+        # left-right, up-down, diagon
+        for h in range(x-sight, x+sight+1):
+            for w in range(y-sight, y+sight+1):
+                radar.append([h, w])
 
-            if h < 0 or h >= H:
-                for _ in range(size * 2 + 1):
-                    y_view.append(-1)
-            else:
-                for w in range(y-size,y+size+1):
-                    if w < 0 or w >= W:
-                        y_view.append(-1)
-                    else:
-                        y_view.append(int(self.state[h][w]))
+        radar = filter(lambda pos: pos != [x, y], radar)
+        state = [self.getCell(cell[0], cell[1]) for cell in radar]
 
-            sight.append(tuple(y_view))
-
-        return tuple(sight)
+        return tuple(state)
 
     def reward(self, x, y):
         if self.done:
@@ -106,7 +112,7 @@ class Board():
         elif cell == '0':
             reward = -1
         elif cell == '2':
-            reward = -1
+            reward = -1000
 
         return reward
 
@@ -143,11 +149,8 @@ class Bot():
         self.last_action = None
         self.last_state = None
 
-    def calcState(self, board):
-        return board.radar(self.x, self.y)
-
     def learn(self, board):
-        curr_state = self.calcState(board)
+        curr_state = board.calcState(self.x, self.y)
         reward = board.reward(self.x, self.y)
 
         if self.last_state is not None:
@@ -158,15 +161,15 @@ class Bot():
         if not auto:
             move = int(stdin.readline())
         else:
-            curr_state = self.calcState(board)
+            curr_state = board.calcState(self.x, self.y)
             move = self.q.chooseAction(curr_state)
 
             # update last state
             self.last_state = curr_state
 
-        # Prevent reversing
         if [move, self.last_action] in FATAL_COUPLES:
-            return self.chooseAction(board, auto)
+            board.done = True
+            return MOVES[move]
 
         # Update (x,y) of bot
         if move == 0:
@@ -197,8 +200,7 @@ def main():
     ## TRAINING
     for e in range(EPOCH):
         # Restart
-        board = Board()
-        board.state = copy.deepcopy(world)
+        board = Board(copy.deepcopy(world))
         bot.restart(world_x, world_y)
 
         done = False
@@ -207,7 +209,7 @@ def main():
         while not board.done:
             # Actuator
             print bot.chooseAction(board)
-            print bot.q.q
+            #print bot.q.q
 
             # Update world
             board.update(bot.x, bot.y)
@@ -217,12 +219,10 @@ def main():
             bot.learn(board)
 
             if board.done:
-                print board.view()
+                board.view()
                 print "GAME %d - %d turn(s)" % (e+1, turn)
 
             turn += 1
-
-    print "END"
 
 if __name__ == '__main__':
     main()
