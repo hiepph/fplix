@@ -257,6 +257,12 @@ class Bot():
             curr_state = board.calcState(self.x, self.y)
             move = self.q.chooseAction(curr_state, self.last_action)
 
+            # Prevent reversing
+            count = 0
+            while count != 10 and [move, self.last_action] in FATAL_MOVES:
+                move = self.q.chooseAction(curr_state, self.last_action)
+                count += 1
+
         # Update (x,y) of bot
         if move == 0:
             self.y -= 1
@@ -267,8 +273,8 @@ class Bot():
         else:
             self.x += 1
 
-        if [move, self.last_action] in FATAL_MOVES:
-            board.done = True
+        #if [move, self.last_action] in FATAL_MOVES:
+            #board.done = True
 
         # Update last move
         self.last_action = move
@@ -305,9 +311,9 @@ def main():
                 board.view()
                 print "GAME %d - %d turn(s) - %d points" % (e+1, turn, bot.score)
                 print "Q {%d KB}" % (sys.getsizeof(bot.q.q)/1024)
-                q = bot.q.q
-                for k, v in q.iteritems():
-                    print k, v
+                #q = bot.q.q
+                #for k, v in q.iteritems():
+                    #print k, v
 
             turn += 1
 
