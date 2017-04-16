@@ -21,21 +21,13 @@ FATAL_MOVES = [
     [3, 2]
 ]
 EPOCH = int(os.environ['EPOCH'])
-if EPOCH is None:
-    EPOCH = 1000
 W = 30
 H = 20
 
-#FATAL_POINT = -1000
-#STABLE_POINT = -10
-#EXPAND_POINT = 10
-#BOOST_POINT = 100
-
-FATAL_POINT = -100
-STABLE_POINT = -1
-EXPAND_POINT = 1
-BOOST_POINT = 10
-
+FATAL_POINT = -1000
+STABLE_POINT = -10
+EXPAND_POINT = 10
+BOOST_POINT = 100
 
 class Board():
     def __init__(self):
@@ -249,7 +241,8 @@ def main():
 
         while not board.done:
             # Actuator
-            print bot.chooseAction(board)
+            action = bot.chooseAction(board)
+            #print action
 
             # Bot learn
             bot.learn(board)
@@ -259,12 +252,12 @@ def main():
             #board.view()
 
             if board.done:
-                board.view()
-                print "GAME %d - %d turn(s)" % (e+1, turn)
+                #board.view()
+                print "GAME %d - %d turn(s) - %d points" % (e+1, turn, bot.score)
                 print "Q {%d KB}" % (sys.getsizeof(bot.q.q)/1024)
-                q = bot.q.q
-                for k, v in q.iteritems():
-                    print k, v
+                #q = bot.q.q
+                #for k, v in q.iteritems():
+                    #print k, v
 
             turn += 1
 
