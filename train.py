@@ -20,9 +20,20 @@ FATAL_MOVES = [
     [2, 3],
     [3, 2]
 ]
-EPOCH = int(os.environ['EPOCH'])
+try:
+    EPOCH = int(os.environ['EPOCH'])
+except ValueError:
+    EPOCH = 1000
 W = 30
 H = 20
+
+# Radar point
+POINTS = {
+    '-1': 1000,
+    '2':  1000,
+    '1':  10,
+    '0':  10,
+}
 
 FATAL_POINT = -1000
 STABLE_POINT = -10
@@ -87,28 +98,67 @@ class Board():
 
         self.done = False
 
-    def getCell(self, x, y):
-        if x not in range(H):
+    def getCell(self, cell):
+        if cell[0] not in range(H):
             return '-1'
-        if y not in range(W):
+        if cell[1] not in range(W):
             return '-1'
 
-        return self.state[x][y]
+        return self.state[cell[0]][cell[1]]
 
-    def calcState(self, x, y, sight=2):
+    def getRadar(self, cells):
+        points = {}
+        max_val = None
+        max_point = None
+        for cell in cells:
+            value = self.getCell(cell)
+
+            if value not in points:
+                points[value] = POINTS[value]
+            else:
+                points[value] += POINTS[value]
+
+            if max_val is None:
+                max_val = value
+            if max_point is None:
+                max_point = points[value]
+
+            if points[value] > max_point:
+                max_val = value
+                max_point = points[value]
+
+        return max_val
+
+    def calcState(self, x, y, sight=3):
         """Make an overview of surrounded environment
         """
 
-        radar = []
-        # left-right, up-down, diagon
-        for h in range(x-sight, x+sight+1):
-            for w in range(y-sight, y+sight+1):
-                radar.append([h, w])
+        left = [[x, w] for w in range(y-sight, y)]
+        right = [[x, w] for w in range(y, y+sight+1)]
+        up = [[h, y] for h in range(x-sight, x)]
+        down = [[h, y] for h in range(x, x+sight+1)]
 
-        radar = filter(lambda pos: pos != [x, y], radar)
-        state = [self.getCell(cell[0], cell[1]) for cell in radar]
+        left_up = []
+        for h in range(x-sight, x):
+            for w in range(y-sight, y):
+                left_up.append([h, w])
 
-        return tuple(state)
+        right_up = []
+        for h in range(x-sight, x):
+            for w in range(y, y+sight+1):
+                right_up.append([h, w])
+
+        left_down = []
+        for h in range(x, x+sight+1):
+            for w in range(y-sight, y):
+                left_down.append([h, w])
+
+        right_down = []
+        for h in range(x, x+sight+1):
+            for w in range(y, y+sight+1):
+                right_down.append([h, w])
+
+        return tuple([self.getRadar(direction) for direction in [left, right, up, down, left_up, right_up, left_down, right_down]])
 
     def reward(self, bot):
         if self.done:
@@ -252,14 +302,17 @@ def main():
             #board.view()
 
             if board.done:
-                #board.view()
+                board.view()
                 print "GAME %d - %d turn(s) - %d points" % (e+1, turn, bot.score)
                 print "Q {%d KB}" % (sys.getsizeof(bot.q.q)/1024)
-                #q = bot.q.q
-                #for k, v in q.iteritems():
-                    #print k, v
+                q = bot.q.q
+                for k, v in q.iteritems():
+                    print k, v
 
             turn += 1
+
+    #for k, v in bot.q.q.iteritems():
+        #print k, v
 
 if __name__ == '__main__':
     main()
