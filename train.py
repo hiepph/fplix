@@ -7,6 +7,16 @@ import os
 
 from q import Q
 
+def dump_q(q, n):
+    f = open('q_%d' % n, 'wb')
+    for k, v in q.iteritems():
+        f.write(str(k))
+        f.write(': ')
+        f.write(str(v))
+        f.write(',\n')
+    f.close()
+
+
 # Hard-code values
 MOVES = [
     'LEFT',     # 0
@@ -314,17 +324,11 @@ def main():
                 break
             turn += 1
 
-    print "Average: %f points - %f turns" % (total_point*1.0/EPOCH, total_turn*1.0/EPOCH)
+        if (e + 1) % 1000 == 0:
+            print "Average: %f points - %f turns" % (total_point*1.0/EPOCH, total_turn*1.0/EPOCH)
+            # Dump Q
+            dump_q(bot.q.q, e+1)
 
-    # Dump Q
-    q = bot.q.q
-    f = open('q', 'wb')
-    for k, v in bot.q.q.iteritems():
-        f.write(str(k))
-        f.write(': ')
-        f.write(str(v))
-        f.write(',\n')
-    f.close()
 
 if __name__ == '__main__':
     main()
