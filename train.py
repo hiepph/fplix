@@ -107,6 +107,10 @@ class Board():
             # Fatal
             return -1000
 
+        if not (x in range(H) and y in range(W)):
+            self.done = True
+            return - 1000
+
         cell = self.state[x][y]
         if cell == '1':
             reward = -10
@@ -210,12 +214,12 @@ def main():
             # Actuator
             print bot.chooseAction(board)
 
+            # Bot learn
+            bot.learn(board)
+
             # Update world
             board.update(bot.x, bot.y)
             #board.view()
-
-            # Bot learn
-            bot.learn(board)
 
             if board.done:
                 board.view()
