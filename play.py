@@ -186,16 +186,6 @@ class Bot():
             #move = self.q.chooseAction(curr_state, self.last_action)
             #count += 1
 
-        # Update (x,y) of bot
-        if move == 0:
-            self.y -= 1
-        elif move == 1:
-            self.y += 1
-        elif move == 2:
-            self.x -= 1
-        else:
-            self.x += 1
-
         # Update last move
         self.last_action = move
 
