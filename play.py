@@ -1012,19 +1012,35 @@ class Bot():
         self.last_action = None
 
     def chooseAction(self, board):
+        # Possible moves limit
+        possible = [0, 1, 2, 3]
+        if self.y == 0:
+            # can't left
+            possible.remove(0)
+        if self.y == W-1:
+            # can't right
+            possible.remove(1)
+        if self.x == 0:
+            # can't up
+            possible.remove(2)
+        if self.x == H-1:
+            # can't down
+            possible.remove(3)
+
+        # use Q
         curr_state = board.calcState(self.x, self.y)
         move = self.q.chooseAction(curr_state)
 
-        # Prevent reversing
-        # 10 times think again
-        count = 0
-        while count != 10 and [move, self.last_action] in FATAL_MOVES:
+        # Prevent reversing and out of board
+        # 10 times to think
+        for _ in range(10):
+            if ([move, self.last_action] not in FATAL_MOVES) and (move in possible):
+                break
             move = self.q.chooseAction(curr_state)
-            count += 1
 
-        # If still hard-headed -> random (not fatal)
+        # If still hard-headed go to death -> random (not fatal)
         if [move, self.last_action] in FATAL_MOVES:
-            possible = filter(lambda a: [a, self.last_action] not in FATAL_MOVES, [0, 1, 2, 3])
+            possible = filter(lambda a: [a, self.last_action] not in FATAL_MOVES, possible)
             move = random.choice(possible)
 
         # Update last move
