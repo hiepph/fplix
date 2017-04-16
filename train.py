@@ -24,10 +24,11 @@ try:
     EPOCH = int(os.environ['EPOCH'])
 except KeyError:
     EPOCH = 1000
+LIMIT = 1000
 W = 30
 H = 20
 
-# Radar point
+# Value points
 POINTS = {
     '-1': 1000,
     '2':  100,
@@ -35,11 +36,14 @@ POINTS = {
     '0':  1
 }
 
-
+# Reward points
 FATAL_POINT = -10000
 BOOST_POINT = 1000
 STABLE_POINT = -10
 EXPAND_POINT = 10
+
+# Point decrease each turn
+DECREASE_POINT = 10
 
 class Board():
     def __init__(self):
@@ -228,7 +232,7 @@ class Bot():
 
     def learn(self, board):
         curr_state = board.calcState(self.x, self.y)
-        reward = board.reward(self)
+        reward = board.reward(self) - DECREASE_POINT
 
         if self.last_state is not None:
             self.q.learn(self.last_state, self.last_action, reward, curr_state)
@@ -309,6 +313,8 @@ def main():
                 total_point += bot.score
                 total_turn  += turn
 
+            if turn == LIMIT:
+                break
             turn += 1
 
     print "Average: %f points - %f turns" % (total_point*1.0/EPOCH, total_turn*1.0/EPOCH)
