@@ -36,8 +36,8 @@ POINTS = {
 }
 
 
-FATAL_POINT = -1000
-BOOST_POINT = 100
+FATAL_POINT = -10000
+BOOST_POINT = 1000
 STABLE_POINT = -10
 EXPAND_POINT = 1
 
@@ -245,10 +245,10 @@ class Bot():
             move = self.q.chooseAction(curr_state, self.last_action)
 
             # Prevent reversing
-            count = 0
-            while count != 10 and [move, self.last_action] in FATAL_MOVES:
-                move = self.q.chooseAction(curr_state, self.last_action)
-                count += 1
+            #count = 0
+            #while count != 10 and [move, self.last_action] in FATAL_MOVES:
+                #move = self.q.chooseAction(curr_state, self.last_action)
+                #count += 1
 
         # Update (x,y) of bot
         if move == 0:
