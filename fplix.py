@@ -1,5 +1,6 @@
 from sys import stdin, stdout
 import random
+import time
 import math
 
 # Hard-code values
@@ -175,6 +176,10 @@ def main():
 
     while True:
         # Actuator
+        # start = time.time()
+        # move = bot.chooseAction()
+        # end = time.time()
+        # print end - start
         print bot.chooseAction()
 
         # Update new board state from stdin
