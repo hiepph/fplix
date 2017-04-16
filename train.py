@@ -22,7 +22,7 @@ FATAL_MOVES = [
 ]
 try:
     EPOCH = int(os.environ['EPOCH'])
-except ValueError:
+except KeyError:
     EPOCH = 1000
 W = 30
 H = 20
@@ -32,7 +32,7 @@ POINTS = {
     '-1': 1000,
     '2':  1000,
     '1':  100,
-    '0':  10,
+    '0':  10
 }
 
 FATAL_POINT = -1000
@@ -169,6 +169,7 @@ class Board():
             self.done = True
             return FATAL_POINT
 
+
         cell = self.state[bot.x][bot.y]
         # empty
         if cell == '0':
@@ -178,19 +179,7 @@ class Board():
             new_score = 0
             for h in range(H):
                 line = ''.join(self.state[h])
-                if '2' in line:
-                    if '1' in line:
-                        start = min([line.index('1'), line.index('2')])
-                        end = max([line.rindex('1'), line.rindex('2')])
-                    else:
-                        start = line.index('2')
-                        end = line.rindex('2')
-
-                    if start is not None and end is not None:
-                        for w in range(start, end+1):
-                            new_score += 1
-
-                elif '1' in line:
+                if '1' in line:
                     start = line.index('1')
                     end = line.rindex('1')
                     for w in range(start, end+1):
@@ -300,12 +289,12 @@ def main():
             action = bot.chooseAction(board)
             #print action
 
-            # Bot learn
-            bot.learn(board)
-
             # Update world
             board.update(bot.x, bot.y)
             #board.view()
+
+            # Bot learn
+            bot.learn(board)
 
             if board.done:
                 board.view()
