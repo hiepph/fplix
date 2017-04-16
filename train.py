@@ -39,7 +39,7 @@ POINTS = {
 FATAL_POINT = -10000
 BOOST_POINT = 1000
 STABLE_POINT = -10
-EXPAND_POINT = 1
+EXPAND_POINT = 10
 
 class Board():
     def __init__(self):
@@ -273,6 +273,8 @@ def main():
     ## Agent
     bot = Bot(1)
 
+    total_point = 0
+    total_turn = 0
     ## TRAINING
     for e in range(EPOCH):
         # Restart
@@ -298,12 +300,18 @@ def main():
                 board.view()
                 print "GAME %d - %d turn(s) - %d points" % (e+1, turn, bot.score)
                 print "Q {%d KB}" % (sys.getsizeof(bot.q.q)/1024)
+
                 #q = bot.q.q
                 #for k, v in q.iteritems():
                     #print k, v
 
+                # Statistics
+                total_point += bot.score
+                total_turn  += turn
+
             turn += 1
 
+    print "Average: %f points - %f turns" % (float(total_point/EPOCH), float(total_turn/EPOCH))
     #for k, v in bot.q.q.iteritems():
         #print k, v
 
