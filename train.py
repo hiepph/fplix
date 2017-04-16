@@ -215,7 +215,7 @@ class Bot():
         self.score = 9
 
         # Q
-        self.q = Q(actions=range(len(MOVES)), epsilon=0.2)
+        self.q = Q(actions=range(len(MOVES)))
         self.last_action = None
         self.last_state = None
 
