@@ -24,7 +24,7 @@ try:
     EPOCH = int(os.environ['EPOCH'])
 except KeyError:
     EPOCH = 1000
-LIMIT = 1000
+LIMIT = 10000
 W = 30
 H = 20
 
@@ -215,7 +215,7 @@ class Bot():
         self.score = 9
 
         # Q
-        self.q = Q(actions=range(len(MOVES)))
+        self.q = Q(actions=range(len(MOVES)), epsilon=0.2)
         self.last_action = None
         self.last_state = None
 
