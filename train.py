@@ -42,9 +42,6 @@ BOOST_POINT = 1000
 STABLE_POINT = -10
 EXPAND_POINT = 10
 
-# Point decrease each turn
-DECREASE_POINT = 10
-
 class Board():
     def __init__(self):
         self.state = [['0' for y in range(W)] for x in range(H)]
@@ -232,7 +229,7 @@ class Bot():
 
     def learn(self, board):
         curr_state = board.calcState(self.x, self.y)
-        reward = board.reward(self) - DECREASE_POINT
+        reward = board.reward(self)
 
         if self.last_state is not None:
             self.q.learn(self.last_state, self.last_action, reward, curr_state)
