@@ -26,6 +26,11 @@ if EPOCH is None:
 W = 30
 H = 20
 
+FATAL_POINT = -1000
+STABLE_POINT = -10
+EXPAND_POINT = 1
+BOOST_POINT = 100
+
 
 class Board():
     def __init__(self, world=None):
@@ -102,25 +107,52 @@ class Board():
 
         return tuple(state)
 
-    def reward(self, x, y):
+    def reward(self, bot):
         if self.done:
             # Fatal
-            return -1000
+            return FATAL_POINT
 
-        if not (x in range(H) and y in range(W)):
+        if not (bot.x in range(H) and bot.y in range(W)):
             self.done = True
-            return - 1000
+            return FATAL_POINT
 
-        cell = self.state[x][y]
-        if cell == '1':
-            reward = -10
-        elif cell == '0':
-            reward = 1
+        cell = self.state[bot.x][bot.y]
+        # empty
+        if cell == '0':
+            return EXPAND_POINT
+
+        elif cell == '1':
+            new_score = 0
+            for h in range(H):
+                line = ''.join(self.state[h])
+                if '2' in line:
+                    if '1' in line:
+                        start = min([line.index('1'), line.index('2')])
+                        end = max([line.rindex('1'), line.rindex('2')])
+                    else:
+                        start = line.index('2')
+                        end = line.rindex('2')
+
+                    if start is not None and end is not None:
+                        for w in range(start, end+1):
+                            new_score += 1
+
+                elif '1' in line:
+                    start = line.index('1')
+                    end = line.rindex('1')
+                    for w in range(start, end+1):
+                        new_score += 1
+
+            # Too dumb to expand the area
+            if new_score == bot.score:
+                return STABLE_POINT
+            else:
+                bot.score = new_score
+                reward = (new_score - bot.score) * BOOST_POINT
+                return reward
+
         elif cell == '2':
-            reward = -1000
-
-        return reward
-
+            return FATAL_POINT
 
 class Bot():
     def __init__(self, index, x=-1, y=-1):
@@ -156,7 +188,7 @@ class Bot():
 
     def learn(self, board):
         curr_state = board.calcState(self.x, self.y)
-        reward = board.reward(self.x, self.y)
+        reward = board.reward(self)
 
         if self.last_state is not None:
             self.q.learn(self.last_state, self.last_action, reward, curr_state)
