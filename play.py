@@ -75,6 +75,9 @@ POINTS = {
 class Board():
     def __init__(self):
         self.state = [['0' for y in range(W)] for x in range(H)]
+        # default
+        self.stable = '1'
+        self.unstable = '2'
 
     def view(self):
         for i in range(H):
@@ -93,12 +96,14 @@ class Board():
         if y not in range(W):
             return '-1'
 
+
         value = self.state[x][y]
+        print value, self.stable, self.unstable
         if value == '0':
             return '0'
-        elif value == STABLE:
+        elif value == self.stable:
             return '1'
-        elif value == UNSTABLE:
+        elif value == self.unstable:
             return '2'
         elif value in STABLES:
             return '0'
@@ -169,7 +174,7 @@ class Bot():
         self.x = x
         self.y = y
 
-        self.ai = None
+        self.q = None
         self.last_action = None
 
     def chooseAction(self, board):
@@ -213,21 +218,21 @@ def main():
     bot = bots[int(stdin.readline()) - 1]
 
     if bot.id == 1:
-        STABLE = '1'
-        UNSTABLE = '2'
+        board.stable = '1'
+        board.unstable = '2'
     elif bot.id == 2:
-        STABLE = '3'
-        UNSTABLE = '4'
+        board.stable = '3'
+        board.unstable = '4'
     elif bot.id == 3:
-        STABLE = '5'
-        UNSTABLE = '6'
+        board.stable = '5'
+        board.unstable = '6'
     elif bot.id == 4:
-        STABLE = '7'
-        UNSTABLE = '8'
+        board.stable = '7'
+        board.unstable = '8'
 
     # Initialize q
-    bot.ai = Q(actions=range(len(MOVES)))
-    bot.ai.q = Q_TRAINED
+    bot.q = Q(actions=range(len(MOVES)))
+    bot.q.q = Q_TRAINED
 
     # Update board adapts to world
     board.update(stdin)
@@ -238,7 +243,7 @@ def main():
 
     while True:
         # Actuator
-        print bot.chooseAction(board.state)
+        print bot.chooseAction(board)
 
         # Update new board state from stdin
         board.update(stdin)
