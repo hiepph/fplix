@@ -315,8 +315,16 @@ def main():
             turn += 1
 
     print "Average: %f points - %f turns" % (total_point*1.0/EPOCH, total_turn*1.0/EPOCH)
-    #for k, v in bot.q.q.iteritems():
-        #print k, v
+
+    # Dump Q
+    q = bot.q.q
+    f = open('q', 'wb')
+    for k, v in bot.q.q.iteritems():
+        f.write(str(k))
+        f.write(': ')
+        f.write(str(v))
+        f.write(',\n')
+    f.close()
 
 if __name__ == '__main__':
     main()
