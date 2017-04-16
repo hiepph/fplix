@@ -98,7 +98,6 @@ class Board():
 
 
         value = self.state[x][y]
-        print value, self.stable, self.unstable
         if value == '0':
             return '0'
         elif value == self.stable:
