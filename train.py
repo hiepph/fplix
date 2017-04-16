@@ -311,7 +311,7 @@ def main():
 
             turn += 1
 
-    print "Average: %f points - %f turns" % (float(total_point/EPOCH), float(total_turn/EPOCH))
+    print "Average: %f points - %f turns" % (total_point*1.0/EPOCH, total_turn*1.0/EPOCH)
     #for k, v in bot.q.q.iteritems():
         #print k, v
 
