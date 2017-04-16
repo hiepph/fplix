@@ -1,6 +1,5 @@
 from sys import stdin, stdout
 import random
-import time
 import math
 
 # Hard-code values
@@ -20,10 +19,10 @@ ACTIONS = {
 
 
 NEXT_ACTIONS = {
-    'LEFT': (-1, 0),
-    'RIGHT': (1, 0),
-    'UP': (0, -1),
-    'DOWN': (0, 1),
+    'LEFT': (0, -1),
+    'RIGHT': (0, 1),
+    'UP': (-1, 0),
+    'DOWN': (1, 0),
 }
 
 TURN = 1000
@@ -95,56 +94,93 @@ class Bot():
         if newX < 0 or newX >= H: return False
         if newY < 0 or newY >= W: return False
         if self.board.getPosition(newX, newY) == self.id + 1: return False
+
+        for bot in self.board.bots:
+            if bot.id == self.id: continue
+            if abs(bot.x - newX) <= 1 and abs(bot.y - newY) <= 1:
+                return False
+
         return True
 
-    def shortestDistToHome(self, square):
+    def shortestDistToHome(self, square, prev=None):
+        # BFS
         visited = [[False for y in range(0, W)] for x in range(0, H)]
 
         x, y = square
-        queue = [(x, y, None, 0, [])]   
+        queue = [(x, y, prev, 0, [])]   
 
         while len(queue) > 0:
-            curX, curY, prev, length, history = queue.pop(0)
+            curX, curY, curPrev, length, history = queue.pop(0)
             visited[curX][curY] = True
+
             if self.board.getPosition(curX, curY) == self.id:
                 return length, history
-            actions = self.possibleActions((curX, curY), prev)
+            actions = self.possibleActions((curX, curY), prev=curPrev)
             for action in actions:
                 nextX, nextY = NEXT_ACTIONS[action]
                 newX, newY = curX + nextX, curY + nextY
                 if not visited[newX][newY]:
                     queue.append((newX, newY, action, length + 1, history + [action]))
-
         return -1, []
 
+    def shortestDistToBeOut(self):
+        # BFS
+        visited = [[False for y in range(0, W)] for x in range(0, H)]
+        queue = [(self.x, self.y, self.prev, 0, [])]
+        while len(queue) > 0:
+            curX, curY, curPrev, length, history = queue.pop(0)
+            visited[curX][curY]
+            if self.board.getPosition(curX, curY) != self.id:
+                return length, history
+            actions = self.possibleActions((curX, curY), prev=curPrev)
+            for action in actions:
+                nextX, nextY = NEXT_ACTIONS[action]
+                newX, newY = curX + nextX, curY + nextY
+                if not visited[newX][newY]:
+                    queue.append((newX, newY, action, length + 1, history + [action]))
+        return -1, []
 
     def chooseAction(self):
-        minDistToEnemy = min(self.distFromEnemies())
-        length, history = self.shortestDistToHome((self.x, self.y))
+        # self.prev = 'LEFT'
+        distFromEnemies = self.distFromEnemies()
+        minDistToEnemy = min(distFromEnemies)
+
+        length, history = self.shortestDistToHome((self.x, self.y), prev=self.prev)
         actions = self.possibleActions((self.x, self.y), self.prev)
-        move = None
+        
+        if len(actions) == 0:
+            move = 'LEFT'
+            self.prev = move
+            return move
 
+        move = random.choice(actions)
         if length == -1:
-            if actions.length == 0: move = 'LEFT'
-            else: move = random.choice(actions)
+            self.prev = move
+            return move
 
-        if length < minDistToEnemy - 1:
-            dist = []
-            for action in actions:
-                x, y = NEXT_ACTIONS[action]
-                l, _ = self.shortestDistToHome((self.x + 1, self.y + y))
-                dist.append(l)
+        if length == 0:
+            l, hist = self.shortestDistToBeOut()
+            move = hist[0]
+            self.prev = move
+            return move
 
-            moveSelectedIndex = None
-            maxDist = 0
-            for i, d in enumerate(dist):
-                if d > maxDist:
-                    maxDist = d
-                    moveSelectedIndex = i
-            move = actions[moveSelectedIndex]
-
-        if l >= minDistToEnemy - 1:
+        if length >= minDistToEnemy - 3:
             move = history[0]
+            self.prev = move
+            return move
+
+        if lenght <= 3:
+            if history[0] == self.prev:
+                move = history[0]
+
+        if length < minDistToEnemy - 3:
+            for action in actions:
+                if action != history[0]:
+                    move = action
+                    break
+
+            self.prev = move
+            return move
 
         self.prev = move
         return move
@@ -175,11 +211,6 @@ def main():
         bots[i].x, bots[i].y = map(int, stdin.readline().split())
 
     while True:
-        # Actuator
-        # start = time.time()
-        # move = bot.chooseAction()
-        # end = time.time()
-        # print end - start
         print bot.chooseAction()
 
         # Update new board state from stdin
