@@ -30,15 +30,16 @@ H = 20
 # Radar point
 POINTS = {
     '-1': 1000,
-    '2':  1000,
-    '1':  100,
-    '0':  10
+    '2':  100,
+    '1':  10,
+    '0':  1
 }
 
+
 FATAL_POINT = -1000
-STABLE_POINT = -10
-EXPAND_POINT = 10
 BOOST_POINT = 100
+STABLE_POINT = -10
+EXPAND_POINT = 1
 
 class Board():
     def __init__(self):
@@ -172,7 +173,7 @@ class Board():
 
         cell = self.state[bot.x][bot.y]
         # empty
-        if cell == '0':
+        if cell == '2':
             return EXPAND_POINT
 
         elif cell == '1':
@@ -192,9 +193,6 @@ class Board():
                 bot.score = new_score
                 reward = (new_score - bot.score) * BOOST_POINT
                 return reward
-
-        elif cell == '2':
-            return FATAL_POINT
 
 class Bot():
     def __init__(self, index, x=-1, y=-1):
