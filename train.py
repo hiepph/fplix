@@ -38,11 +38,17 @@ BOOST_POINT = 10
 
 
 class Board():
-    def __init__(self, world=None):
-        if world is None:
-            self.state = [['0' for y in range(W)] for x in range(H)]
-        else:
-            self.state = world
+    def __init__(self):
+        self.state = [['0' for y in range(W)] for x in range(H)]
+        x = random.randint(0, H-3)
+        y = random.randint(0, W-3)
+        for h in range(x, x+3):
+            for w in range(y, y+3):
+                self.state[h][w] = '1'
+
+        self.random_x = random.choice(range(x, x+3))
+        self.random_y = random.choice(range(y, y+3))
+
         self.done = False
 
     # Pretty print state
@@ -229,20 +235,14 @@ class Bot():
 
 
 def main():
-    ## WORLD MAKING
-    world = [['0' for y in range(W)] for x in range(H)]
-    for i in range(H):
-        world[i] = list(stdin.readline()[:-1])
-    world_x, world_y = map(int, stdin.readline().split())
-
     ## Agent
     bot = Bot(1)
 
     ## TRAINING
     for e in range(EPOCH):
         # Restart
-        board = Board(copy.deepcopy(world))
-        bot.restart(world_x, world_y)
+        board = Board()
+        bot.restart(board.random_x, board.random_y)
 
         done = False
         turn = 1
