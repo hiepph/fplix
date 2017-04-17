@@ -80,9 +80,6 @@ class Board():
         self.oppo_stable = '3'
         self.oppo_unstable = '4'
 
-        # Head of other bots
-        self.bots = []
-
     def view(self):
         if self.state is not None:
             for i in range(H):
@@ -102,14 +99,26 @@ class Board():
 
     def getCell(self, cell):
         """Get specific corresponding to cell
-        Also map again into stable/unstable region"""
+        Map value if necessary into keys of POINTS"""
+        x, y = cell
 
-        if cell[0] not in range(H):
-            return '-1'
-        if cell[1] not in range(W):
-            return '-1'
+        # Out of board
+        if x not in range(H):
+            return self.out
+        if y not in range(W):
+            return self.out
 
-        return self.state[cell[0]][cell[1]]
+        # Map value
+        value = self.state[x][y]
+        if value in ['0', '1', '2']:
+            return value
+        elif value in ['3', '5', '7']:
+            return '3'
+        elif value in ['4', '6', '8']:
+            return '4'
+        else:
+            # opponents
+            return '-2'
 
     def getRadar(self, cells):
         points = {}
@@ -216,10 +225,11 @@ class Bot():
 
     def learn(self, board):
         curr_state = board.calcState(self.x, self.y)
-        reward = board.reward(self)
+        print curr_state
+        #reward = board.reward(self)
 
-        if self.last_state is not None:
-            self.q.learn(self.last_state, self.last_action, reward, curr_state)
+        #if self.last_state is not None:
+            #self.ai.learn(self.last_state, self.last_action, reward, curr_state)
 
         # update last state
         self.last_state = curr_state
@@ -242,9 +252,9 @@ def main():
         # First position of my bot
         bot.x, bot.y = map(int, f.readline().split())
 
-        # First position of other bots
+        # First position of other bots (skip)
         for _ in range(n_players-1):
-            board.bots = map(int, f.readline().split())
+            f.readline()
 
         # First score, already initialized -> just skip
         f.readline()
@@ -265,6 +275,7 @@ def main():
 
             # Update board state
             board.updateState(f)
+            # Check if game were done
             if board.done:
                 board.view()
                 print 'EPOCH %d: %s - %d turn(s)' % (e+1, game, turn)
@@ -272,16 +283,16 @@ def main():
 
             # Update position of my bot
             bot.x, bot.y = map(int, f.readline().split())
-            # Update positions of other bots
+            # Update positions of other bots (skip)
             for _ in range(n_players-1):
-                board.bots = map(int, f.readline().split())
+                f.readline()
 
             # Update score
             bot.score = int(f.readline().split()[0])
 
 
             ## LEARN
-            #bot.learn(board)
+            bot.learn(board)
 
             turn += 1
 
