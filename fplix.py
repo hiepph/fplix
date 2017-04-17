@@ -61,6 +61,7 @@ class Bot():
         self.y = y
         self.board = board
         self.prev = None
+        self.goBack = False
 
     # state: Board' state format a.k.a 2-d array
     def distFromEnemies(self):
@@ -161,17 +162,20 @@ class Bot():
         if length == 0:
             l, hist = self.shortestDistToBeOut()
             move = hist[0]
+            self.goBack = False
+            self.prev = move
+            return move
+
+        if self.goBack:
+            move = history[0]
             self.prev = move
             return move
 
         if length >= minDistToEnemy - 3:
             move = history[0]
+            self.goBack = True
             self.prev = move
             return move
-
-        if lenght <= 3:
-            if history[0] == self.prev:
-                move = history[0]
 
         if length < minDistToEnemy - 3:
             for action in actions:
