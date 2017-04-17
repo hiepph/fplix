@@ -38,8 +38,9 @@ POINTS = {
 FATAL_POINT = -100
 BOOST_POINT = 10
 STABLE_POINT = -10
-EXPAND_POINT = 15
+EMPTY_POINT = 10
 # Oppo
+OPPO_STABLE_POINT = 15
 KILL_POINT = 50
 KILLED_POINT = -50
 
@@ -77,6 +78,9 @@ class Board():
         self.oppo_stable = '3'
         self.oppo_unstable = '4'
 
+        # History
+        self.last_state = None
+
     def view(self):
         for i in range(H):
             print ''.join(self.state[i])
@@ -89,7 +93,7 @@ class Board():
         for i in range(H):
             self.state[i] = list(inputs.readline()[:-1])
 
-    def getCell(self, cell):
+    def getCell(self, cell, past=False):
         """Get specific corresponding to cell
         Map value if necessary into keys of POINTS"""
         x, y = cell
@@ -101,7 +105,10 @@ class Board():
             return '-1'
 
         # Map value
-        value = self.state[x][y]
+        if past:
+            value = self.last_state[x][y]
+        else:
+            value = self.state[x][y]
         if value in ['0', '1', '2']:
             return value
         elif value in ['3', '5', '7']:
@@ -168,7 +175,7 @@ class Board():
 
     def reward(self, bot):
         if self.done:
-            # Fatal
+            # Fatal/Killed
             return FATAL_POINT
 
         value = self.getCell([self.x, self.y])
@@ -178,7 +185,17 @@ class Board():
         elif value == '1':
             return (self.score - self.last_score) * BOOST_POINT
         elif value == '2':
-            return EXPAND_POINT
+            last_value = self.getCell(past=True)
+            # Expand region (empty)
+            if last_value == '0':
+                return EMPTY_POINT
+            # Expand region (oppo)
+            elif last_value == '3':
+                return OPPO_STABLE_POINT
+            # Kill
+            elif last_value == '4' or last_value == '-2':
+                return KILL_POINT
+
 
 class Bot():
     def __init__(self, idx, x=-1, y=-1, trained_q=None, epsilon=EPSILON):
@@ -225,6 +242,7 @@ def main():
 
     games = os.listdir('crawl')
     for e, game in enumerate(games[:EPOCH]):
+        print '---> %s' % game
         f = open('crawl/' + game, 'r')
 
         # Initalize process
@@ -239,70 +257,64 @@ def main():
         # First position of my bot
         bot.x, bot.y = map(int, f.readline().split())
 
-        # First position of other bots (just check of -1,-1 only)
-        qualified = True
+        # First position of other bots (skip)
         for _ in range(n_players-1):
-            try:
-                x, y = map(int, f.readline().split())
-                if x == -1 and y == -1:
-                    qualified = False
-            except:
-                qualified = False
-
-        if not qualified:
-            print 'ERROR: Game (%s) skip!' % game
-            f.close()
-            continue
+            f.readline()
 
         # First score, already initialized -> just skip
         f.readline()
 
+        # First time update last move
+        try:
+            last_move = f.readline().split()[0]
+        except ValueError:
+            # Prevent case like 4832
+            f.close()
+            continue
+
         turn = 1
         # Loop for game playing
         while True:
-            # Update last action of bot in previous game
-            try:
-                last_move = f.readline().split()[0]
+            # Output fail move, bot won't learn anymore -> end the game
+            if last_move == '-':
+                board.review(epoch=e, game=game, turn=turn)
+                break
+            else:
+                bot.last_action = ACTIONS[last_move]
 
-                # Output fail move, bot won't learn anymore -> end the game
-                if last_move == '-':
+                # Update board state
+                board.last_state = board.state
+                board.updateState(f)
+                if board.state == [[] for _ in range(H)]:
                     board.review(epoch=e, game=game, turn=turn)
                     break
-                else:
-                    bot.last_action = ACTIONS[last_move]
 
-                    # Update board state
-                    board.updateState(f)
+                # Update position of my bot
+                bot.x, bot.y = map(int, f.readline().split())
+                if bot.x == -1 and bot.y == -1:
+                    board.done = True
 
-                    # Update position of my bot
-                    bot.x, bot.y = map(int, f.readline().split())
-                    if bot.x == -1 and bot.y == -1:
-                        board.done = True
+                # Update positions of other bots (skip)
+                for _ in range(n_players-1):
+                    f.readline()
 
-                    # Update positions of other bots (check for -1, -1 only)
-                    for _ in range(n_players-1):
-                        x, y = map(int, f.readline().split())
-                        if x == -1 and y == -1:
-                            board.done = True
+                # Update score
+                bot.last_score = bot.score
+                bot.score = int(f.readline().split()[0])
 
-                    # Update score
-                    bot.last_score = bot.score
-                    bot.score = int(f.readline().split()[0])
+                ## LEARN
+                #bot.learn(board)
 
-                    ## LEARN
-                    #bot.learn(board)
+                # Update last action of bot in previous game
+                last_move = f.readline().split()[0]
 
-                    # Prepare for next turn
-                    turn += 1
+                # Prepare for next turn
+                turn += 1
 
-                    # Check if game were done or max 1000 turns
-                    if turn == 1000 or board.done:
-                        board.review(epoch=e, game=game, turn=turn)
-                        break
-
-            except:
-                print '>>> ERROR: Game (%s) wrong. Skip!'
-                break
+                # Check if game were done or max 1000 turns
+                if turn == 1000 or board.done:
+                    board.review(epoch=e, game=game, turn=turn)
+                    break
 
     f.close()
 
