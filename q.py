@@ -1,5 +1,4 @@
 import random
-import sys
 
 class Q:
     def __init__(self, actions, epsilon=0.1, alpha=0.2, gamma=0.9):

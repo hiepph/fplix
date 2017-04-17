@@ -177,14 +177,14 @@ class Board():
             # Fatal/Killed
             return FATAL_POINT
 
-        value = self.getCell([self.x, self.y])
+        value = self.getCell([bot.x, bot.y])
         if value == '-1':
             board.done = True
             return FATAL_POINT
         elif value == '1':
-            return (self.score - self.last_score) * BOOST_POINT
+            return (bot.score - bot.last_score) * BOOST_POINT
         elif value == '2':
-            last_value = self.getCell(past=True)
+            last_value = self.getCell([bot.x, bot.y], past=True)
             # Expand region (empty)
             if last_value == '0':
                 return EMPTY_POINT
@@ -197,7 +197,7 @@ class Board():
 
 
 class Bot():
-    def __init__(self, idx, x=-1, y=-1, trained_q=None, epsilon=EPSILON):
+    def __init__(self, idx, x=-1, y=-1, epsilon=EPSILON):
         self.id = idx
         self.x = x
         self.y = y
@@ -205,8 +205,6 @@ class Bot():
 
         # Q
         self.ai = Q(actions=range(4), epsilon=epsilon)
-        if trained_q is not None:
-            self.ai.q = trained_q
 
         # History for learning
         self.last_action = None
@@ -228,8 +226,8 @@ class Bot():
         curr_state = board.calcState(self.x, self.y)
         reward = board.reward(self)
 
-        #if self.last_state is not None:
-            #self.ai.learn(self.last_state, self.last_action, reward, curr_state)
+        if self.last_state is not None:
+            self.ai.learn(self.last_state, self.last_action, reward, curr_state)
 
         # update last state
         self.last_state = curr_state
@@ -282,7 +280,7 @@ def main():
                 bot.last_action = ACTIONS[last_move]
 
                 # Update board state
-                board.last_state = board.state
+                board.last_state = copy.deepcopy(board.state)
                 board.updateState(f)
                 if board.state == [[] for _ in range(H)]:
                     board.review(epoch=e, game=game, turn=turn)
@@ -302,7 +300,7 @@ def main():
                 bot.score = int(f.readline().split()[0])
 
                 ## LEARN
-                #bot.learn(board)
+                bot.learn(board)
 
                 # Update last action of bot in previous game
                 last_move = f.readline().split()[0]
@@ -316,6 +314,9 @@ def main():
                     break
 
     f.close()
+
+    if (e+1) % 1000 == 0:
+        dump_q(bot.ai.q, e+1)
 
 if __name__ == '__main__':
     main()
