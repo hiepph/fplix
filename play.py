@@ -1295,7 +1295,7 @@ class Board():
         elif value in STABLES:
             return '0'
         elif value in UNSTABLES:
-            return '-1'
+            return '0'
 
     def getRadar(self, cells):
         points = {}
@@ -1382,16 +1382,20 @@ class Bot():
 
         left = board.getCell([self.x, self.y-1])
         if left == '2':
-            possible.remove(0)
+            if 0 in possible:
+                possible.remove(0)
         right = board.getCell([self.x, self.y+1])
         if right == '2':
-            possible.remove(1)
+            if 1 in possible:
+                possible.remove(1)
         up = board.getCell([self.x-1, self.y])
         if up == '2':
-            possible.remove(2)
+            if 2 in possible:
+                possible.remove(2)
         down = board.getCell([self.x+1, self.y])
         if down == '2':
-            possible.remove(3)
+            if 3 in possible:
+                possible.remove(3)
 
         # use Q
         curr_state = board.calcState(self.x, self.y)
