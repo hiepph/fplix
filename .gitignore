@@ -93,3 +93,6 @@ log
 
 # Q
 q_*
+
+# data
+*.txt
