@@ -86,7 +86,6 @@ class Board():
             print ''.join(self.state[i])
 
     def review(self, epoch, game, turn):
-        self.view()
         print 'EPOCH %d (%s) - %d turn(s)' % (epoch, game, turn)
 
     def updateState(self, inputs):
@@ -267,7 +266,7 @@ def main():
         # First time update last move
         try:
             last_move = f.readline().split()[0]
-        except ValueError:
+        except IndexError:
             # Prevent case like 4832
             f.close()
             continue
