@@ -88,14 +88,15 @@ class Board():
             print 'None'
 
     def updateState(self, inputs):
-        for i in range(H):
-            line = inputs.readline()
-            if line == '':
-                # end game
-                self.state = None
-                self.done = True
-            else:
-                self.state[i] = list(line[:-1])
+        if not self.done:
+            for i in range(H):
+                line = inputs.readline()
+                if line == '':
+                    # end game
+                    self.state = None
+                    self.done = True
+                else:
+                    self.state[i] = list(line[:-1])
 
     def getCell(self, cell):
         """Get specific corresponding to cell
@@ -222,6 +223,7 @@ class Bot():
         # History for learning
         self.last_action = None
         self.last_state = None
+        self.last_score = None
 
     def learn(self, board):
         curr_state = board.calcState(self.x, self.y)
@@ -288,6 +290,7 @@ def main():
                 f.readline()
 
             # Update score
+            bot.last_score = bot.score
             bot.score = int(f.readline().split()[0])
 
 
