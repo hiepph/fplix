@@ -84,14 +84,18 @@ class Board():
         self.bots = []
 
     def view(self):
-        for i in range(H):
-            print ''.join(self.state[i])
+        if self.state is not None:
+            for i in range(H):
+                print ''.join(self.state[i])
+        else:
+            print 'None'
 
     def updateState(self, inputs):
         for i in range(H):
             line = inputs.readline()
             if line == '':
                 # end game
+                self.state = None
                 self.done = True
             else:
                 self.state[i] = list(line[:-1])
@@ -274,6 +278,10 @@ def main():
 
             # Update score
             bot.score = int(f.readline().split()[0])
+
+
+            ## LEARN
+            #bot.learn(board)
 
             turn += 1
 
