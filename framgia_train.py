@@ -266,9 +266,13 @@ def main():
         # First position of other bots (just check of -1,-1 only)
         qualified = True
         for _ in range(n_players-1):
-            x, y = map(int, f.readline().split())
-            if x == -1 and y == -1:
+            try:
+                x, y = map(int, f.readline().split())
+                if x == -1 and y == -1:
+                    qualified = False
+            except:
                 qualified = False
+
         if not qualified:
             print 'ERROR: Game (%s) skip!' % game
             f.close()
@@ -310,7 +314,7 @@ def main():
                     bot.score = int(f.readline().split()[0])
 
                     ## LEARN
-                    bot.learn(board)
+                    #bot.learn(board)
 
                     # Prepare for next turn
                     turn += 1
@@ -320,7 +324,7 @@ def main():
                         board.review(epoch=e, game=game, turn=turn)
                         break
 
-            except IndexError:
+            except:
                 print '>>> ERROR: Game (%s) wrong. Skip!'
                 break
 
