@@ -1373,10 +1373,10 @@ class Bot():
         right = board.getCell([self.x, self.y+1])
         if right == '-1' or right == '2':
             possible.remove(1)
-        up = board.getCell([self.x-1, self.y]):
+        up = board.getCell([self.x-1, self.y])
         if up == '-1' or up == '2':
             possible.remove(2)
-        down = board.getCell([self.x+1, self.y]):
+        down = board.getCell([self.x+1, self.y])
         if down == '-1' or down == '2':
             possible.remove(3)
 
