@@ -66,6 +66,7 @@ def dump_q(q, n):
 class Board():
     def __init__(self):
         self.state = [['0' for y in range(W)] for x in range(H)]
+        # Fatal
         self.done = False
 
         # Out of board
@@ -81,22 +82,16 @@ class Board():
         self.oppo_unstable = '4'
 
     def view(self):
-        if self.state is not None:
-            for i in range(H):
-                print ''.join(self.state[i])
-        else:
-            print 'None'
+        for i in range(H):
+            print ''.join(self.state[i])
+
+    def review(self, n_epochs, game, n_turns):
+        self.view()
+        print 'EPOCH %d (%s) - %d turn(s)' % (n_epochs, game, turn)
 
     def updateState(self, inputs):
-        if not self.done:
-            for i in range(H):
-                line = inputs.readline()
-                if line == '':
-                    # end game
-                    self.state = None
-                    self.done = True
-                else:
-                    self.state[i] = list(line[:-1])
+        for i in range(H):
+            self.state[i] = list(inputs.readline()[:-1])
 
     def getCell(self, cell):
         """Get specific corresponding to cell
@@ -225,10 +220,20 @@ class Bot():
         self.last_state = None
         self.last_score = None
 
+    def restart(self):
+        """Reset everything except id & Q (important)"""
+        self.x = -1
+        self.y = -1
+        self.score = 9
+
+        self.last_action = None
+        self.last_state = None
+        self.last_score = None
+
+
     def learn(self, board):
         curr_state = board.calcState(self.x, self.y)
-        print curr_state
-        #reward = board.reward(self)
+        reward = board.reward(self)
 
         #if self.last_state is not None:
             #self.ai.learn(self.last_state, self.last_action, reward, curr_state)
@@ -238,6 +243,9 @@ class Bot():
 
 
 def main():
+    # Release the kraken
+    bot = Bot(1)
+
     games = os.listdir('crawl')
     for e, game in enumerate(games[:EPOCH]):
         f = open('crawl/' + game, 'r')
@@ -246,7 +254,7 @@ def main():
         board = Board()
 
         n_players = int(f.readline())
-        bot = Bot(1)
+        bot.restart()
 
         # First state of board
         board.updateState(f)
@@ -267,37 +275,45 @@ def main():
             # Update last action of bot in previous game
             try:
                 last_move = f.readline().split()[0]
+
+                # Output fail move, bot won't learn anymore -> end the game
                 if last_move == '-':
-                    board.done = True
+                    board.review(n_epochs=e, game=game, turn=turn)
+                    break
                 else:
                     bot.last_action = ACTIONS[last_move]
+
+                    # Update board state
+                    board.updateState(f)
+
+                    # Update position of my bot
+                    bot.x, bot.y = map(int, f.readline().split())
+                    if bot.x == '-1' and bot.y == '-1':
+                        board.done = True
+
+                    # Update positions of other bots (skip)
+                    for _ in range(n_players-1):
+                        f.readline()
+
+                    # Update score
+                    bot.last_score = bot.score
+                    bot.score = int(f.readline().split()[0])
+
+                    ## LEARN
+                    bot.learn(board)
+
+                    # Check if game were done or max 1000 turns
+                    if turn == 1000 or board.done:
+                        board.review(n_epochs=e, game=game, turn=turn)
+                        break
+
+                    # Prepare for next turn
+                    turn += 1
+
+
             except IndexError:
                 print '>>> ERROR: Game wrong. Skip!'
                 break
-
-            # Update board state
-            board.updateState(f)
-            # Check if game were done
-            if board.done:
-                board.view()
-                print 'EPOCH %d: %s - %d turn(s)' % (e+1, game, turn)
-                break
-
-            # Update position of my bot
-            bot.x, bot.y = map(int, f.readline().split())
-            # Update positions of other bots (skip)
-            for _ in range(n_players-1):
-                f.readline()
-
-            # Update score
-            bot.last_score = bot.score
-            bot.score = int(f.readline().split()[0])
-
-
-            ## LEARN
-            bot.learn(board)
-
-            turn += 1
 
     f.close()
 
