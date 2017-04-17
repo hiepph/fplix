@@ -1,4 +1,4 @@
-from sys import stdin
+from sys import stdin, stdout
 import sys
 import random
 import time
@@ -194,6 +194,8 @@ class Board():
             # Kill
             elif last_value == '4' or last_value == '-2':
                 return KILL_POINT
+            else:
+                return FATAL_POINT
 
 
 class Bot():
@@ -298,6 +300,11 @@ def main():
                 # Update score
                 bot.last_score = bot.score
                 bot.score = int(f.readline().split()[0])
+
+                if bot.score < 0:
+                    # game bug
+                    board.review(epoch=e, game=game, turn=turn)
+                    break
 
                 ## LEARN
                 bot.learn(board)
