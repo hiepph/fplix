@@ -85,9 +85,9 @@ class Board():
         for i in range(H):
             print ''.join(self.state[i])
 
-    def review(self, n_epochs, game, n_turns):
+    def review(self, epoch, game, turn):
         self.view()
-        print 'EPOCH %d (%s) - %d turn(s)' % (n_epochs, game, turn)
+        print 'EPOCH %d (%s) - %d turn(s)' % (epoch, game, turn)
 
     def updateState(self, inputs):
         for i in range(H):
@@ -233,7 +233,8 @@ class Bot():
 
     def learn(self, board):
         curr_state = board.calcState(self.x, self.y)
-        reward = board.reward(self)
+        #print curr_state
+        #reward = board.reward(self)
 
         #if self.last_state is not None:
             #self.ai.learn(self.last_state, self.last_action, reward, curr_state)
@@ -262,9 +263,16 @@ def main():
         # First position of my bot
         bot.x, bot.y = map(int, f.readline().split())
 
-        # First position of other bots (skip)
+        # First position of other bots (just check of -1,-1 only)
+        qualified = True
         for _ in range(n_players-1):
-            f.readline()
+            x, y = map(int, f.readline().split())
+            if x == -1 and y == -1:
+                qualified = False
+        if not qualified:
+            print 'ERROR: Game (%s) skip!' % game
+            f.close()
+            continue
 
         # First score, already initialized -> just skip
         f.readline()
@@ -278,7 +286,7 @@ def main():
 
                 # Output fail move, bot won't learn anymore -> end the game
                 if last_move == '-':
-                    board.review(n_epochs=e, game=game, turn=turn)
+                    board.review(epoch=e, game=game, turn=turn)
                     break
                 else:
                     bot.last_action = ACTIONS[last_move]
@@ -288,12 +296,14 @@ def main():
 
                     # Update position of my bot
                     bot.x, bot.y = map(int, f.readline().split())
-                    if bot.x == '-1' and bot.y == '-1':
+                    if bot.x == -1 and bot.y == -1:
                         board.done = True
 
-                    # Update positions of other bots (skip)
+                    # Update positions of other bots (check for -1, -1 only)
                     for _ in range(n_players-1):
-                        f.readline()
+                        x, y = map(int, f.readline().split())
+                        if x == -1 and y == -1:
+                            board.done = True
 
                     # Update score
                     bot.last_score = bot.score
@@ -302,17 +312,16 @@ def main():
                     ## LEARN
                     bot.learn(board)
 
-                    # Check if game were done or max 1000 turns
-                    if turn == 1000 or board.done:
-                        board.review(n_epochs=e, game=game, turn=turn)
-                        break
-
                     # Prepare for next turn
                     turn += 1
 
+                    # Check if game were done or max 1000 turns
+                    if turn == 1000 or board.done:
+                        board.review(epoch=e, game=game, turn=turn)
+                        break
 
             except IndexError:
-                print '>>> ERROR: Game wrong. Skip!'
+                print '>>> ERROR: Game (%s) wrong. Skip!'
                 break
 
     f.close()
