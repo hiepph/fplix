@@ -34,7 +34,7 @@ try:
     EPOCH = int(os.environ['EPOCH'])
 except KeyError:
     EPOCH = 1000
-LIMIT = 10000
+LIMIT = 1000
 W = 30
 H = 20
 
@@ -47,10 +47,10 @@ POINTS = {
 }
 
 # Reward points
-FATAL_POINT = -10000
-BOOST_POINT = 1000
-STABLE_POINT = -10
-EXPAND_POINT = 10
+FATAL_POINT = -1000
+BOOST_POINT = 100
+STABLE_POINT = -100
+EXPAND_POINT = 100
 
 class Board():
     def __init__(self):
@@ -225,7 +225,7 @@ class Bot():
         self.score = 9
 
         # Q
-        self.q = Q(actions=range(len(MOVES)))
+        self.q = Q(actions=range(len(MOVES)), epsilon=0.5)
         self.last_action = None
         self.last_state = None
 
