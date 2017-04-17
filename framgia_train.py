@@ -38,9 +38,8 @@ POINTS = {
 FATAL_POINT = -100
 BOOST_POINT = 10
 STABLE_POINT = -10
-EMPTY_POINT = 10
+EXPAND_POINT = 15
 # Oppo
-OPPO_STABLE_POINT = 15
 KILL_POINT = 50
 KILLED_POINT = -50
 
@@ -68,9 +67,6 @@ class Board():
         self.state = [['0' for y in range(W)] for x in range(H)]
         # Fatal
         self.done = False
-
-        # Out of board
-        self.out = '-1'
 
         # Default bot id 1 for framgia
         self.stable = '1'
@@ -100,9 +96,9 @@ class Board():
 
         # Out of board
         if x not in range(H):
-            return self.out
+            return '-1'
         if y not in range(W):
-            return self.out
+            return '-1'
 
         # Map value
         value = self.state[x][y]
@@ -175,33 +171,14 @@ class Board():
             # Fatal
             return FATAL_POINT
 
-        if not (bot.x in range(H) and bot.y in range(W)):
-            self.done = True
+        value = self.getCell([self.x, self.y])
+        if value == '-1':
+            board.done = True
             return FATAL_POINT
-
-
-        cell = self.state[bot.x][bot.y]
-        # empty
-        if cell == '2':
+        elif value == '1':
+            return (self.score - self.last_score) * BOOST_POINT
+        elif value == '2':
             return EXPAND_POINT
-
-        elif cell == '1':
-            new_score = 0
-            for h in range(H):
-                line = ''.join(self.state[h])
-                if '1' in line:
-                    start = line.index('1')
-                    end = line.rindex('1')
-                    for w in range(start, end+1):
-                        new_score += 1
-
-            # Too dumb to expand the area
-            if new_score == bot.score:
-                return STABLE_POINT
-            else:
-                bot.score = new_score
-                reward = (new_score - bot.score) * BOOST_POINT
-                return reward
 
 class Bot():
     def __init__(self, idx, x=-1, y=-1, trained_q=None, epsilon=EPSILON):
@@ -233,8 +210,7 @@ class Bot():
 
     def learn(self, board):
         curr_state = board.calcState(self.x, self.y)
-        #print curr_state
-        #reward = board.reward(self)
+        reward = board.reward(self)
 
         #if self.last_state is not None:
             #self.ai.learn(self.last_state, self.last_action, reward, curr_state)
