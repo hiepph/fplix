@@ -1367,17 +1367,17 @@ class Bot():
     def chooseAction(self, board):
         # Possible moves limit
         possible = [0, 1, 2, 3]
-        if self.y == 0:
-            # can't left
+        left = board.getCell([self.x, self.y-1])
+        if left == '-1' or left == '2':
             possible.remove(0)
-        if self.y == W-1:
-            # can't right
+        right = board.getCell([self.x, self.y+1])
+        if right == '-1' or right == '2':
             possible.remove(1)
-        if self.x == 0:
-            # can't up
+        up = board.getCell([self.x-1, self.y]):
+        if up == '-1' or up == '2':
             possible.remove(2)
-        if self.x == H-1:
-            # can't down
+        down = board.getCell([self.x+1, self.y]):
+        if down == '-1' or down == '2':
             possible.remove(3)
 
         # use Q
