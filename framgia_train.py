@@ -5,17 +5,22 @@ import time
 import copy
 import os
 
+try:
+    EPOCH = int(os.getenv('EPOCH'))
+except:
+    EPOCH = 10462
+
 # Board
 W = 30
 H = 20
 
 # Bot
-ACTIONS = [
+ACTIONS = {
     'L': 0,
     'R': 1,
     'U': 2,
     'D': 3
-]
+}
 
 # Value points
 POINTS = {
@@ -61,6 +66,7 @@ def dump_q(q, n):
 class Board():
     def __init__(self):
         self.state = [['0' for y in range(W)] for x in range(H)]
+        self.done = False
 
         # Out of board
         self.out = '-1'
@@ -83,7 +89,12 @@ class Board():
 
     def updateState(self, inputs):
         for i in range(H):
-            self.state[i] = list(inputs.readline()[:-1])
+            line = inputs.readline()
+            if line == '':
+                # end game
+                self.done = True
+            else:
+                self.state[i] = list(line[:-1])
 
     def getCell(self, cell):
         """Get specific corresponding to cell
@@ -191,7 +202,7 @@ class Bot():
         self.score = 9
 
         # Q
-        self.ai = Q(actions=range(len(MOVES)), epsilon=epsilon)
+        self.ai = Q(actions=range(4), epsilon=epsilon)
         if trained_q is not None:
             self.ai.q = trained_q
 
@@ -212,46 +223,59 @@ class Bot():
 
 def main():
     games = os.listdir('crawl')
-    #for game in games:
-    game = games[random.randint(10000)]
+    for e, game in enumerate(games[:EPOCH]):
+        f = open('crawl/' + game, 'r')
 
-    f = open('crawl/' + game, 'r')
+        # Initalize process
+        board = Board()
 
-    # Initalize process
-    board = Board()
+        n_players = int(f.readline())
+        bot = Bot(1)
 
-    n_players = int(f.readline())
-    bot = Bot(1)
-
-    # First state of board
-    board.updateState(f)
-
-    # First position of my bot
-    bot.x, bot.y = map(int, f.readline().split())
-
-    # First position of other bots
-    for _ in range(n_players-1):
-        board.bots = map(int, f.readline().split())
-
-    # First score, already initialized -> just skip
-    f.readline()
-
-    # Loop for game playing
-    while True:
-        # Update last action of bot in previous game
-        bot.last_action = ACTIONS[f.readline().split()[0]]
-
-        # Update board state
+        # First state of board
         board.updateState(f)
 
-        # Update position of my bot
+        # First position of my bot
         bot.x, bot.y = map(int, f.readline().split())
-        # Update positions of other bots
+
+        # First position of other bots
         for _ in range(n_players-1):
             board.bots = map(int, f.readline().split())
 
-        # Update score
-        bot.score = int(f.readline().split()[0])
+        # First score, already initialized -> just skip
+        f.readline()
+
+        turn = 1
+        # Loop for game playing
+        while True:
+            # Update last action of bot in previous game
+            try:
+                last_move = f.readline().split()[0]
+                if last_move == '-':
+                    board.done = True
+                else:
+                    bot.last_action = ACTIONS[last_move]
+            except IndexError:
+                print '>>> ERROR: Game wrong. Skip!'
+                break
+
+            # Update board state
+            board.updateState(f)
+            if board.done:
+                board.view()
+                print 'EPOCH %d: %s - %d turn(s)' % (e+1, game, turn)
+                break
+
+            # Update position of my bot
+            bot.x, bot.y = map(int, f.readline().split())
+            # Update positions of other bots
+            for _ in range(n_players-1):
+                board.bots = map(int, f.readline().split())
+
+            # Update score
+            bot.score = int(f.readline().split()[0])
+
+            turn += 1
 
     f.close()
 
