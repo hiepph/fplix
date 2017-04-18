@@ -322,10 +322,10 @@ def main():
                     board.review(epoch=e, game=game, turn=turn)
                     break
 
-    f.close()
+        if (e+1) % 100 == 0:
+            dump_q(bot.ai.q, e+1)
 
-    if (e+1) % 100 == 0:
-        dump_q(bot.ai.q, e+1)
+    f.close()
 
 if __name__ == '__main__':
     main()
