@@ -5,8 +5,8 @@ import time
 import copy
 import os
 
-EPSILON = 0.2
-EPOCH = 5000
+EPSILON = 0.5
+EPOCH = 8000
 
 Q_TRAINED = {
 (('4', '2', '1', '2', '1', '1', '2', '2'), 2):64.5822857908,
