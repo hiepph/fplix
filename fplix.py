@@ -19280,19 +19280,36 @@ class Bot():
 
     def chooseAction(self, board):
         # Possible moves limit
-        possible = range(4)
-        left = board.getCell([self.x, self.y-1])
-        if left == '2' or left == '-1':
+        possible = [0, 1, 2, 3]
+        if self.y == 0:
+            # can't left
             possible.remove(0)
-        right = board.getCell([self.x, self.y+1])
-        if right == '2' or right == '-1':
+        if self.y == W-1:
+            # can't right
             possible.remove(1)
-        up = board.getCell([self.x-1, self.y])
-        if up == '2' or up == '-1':
+        if self.x == 0:
+            # can't up
             possible.remove(2)
-        down = board.getCell([self.x+1, self.y])
-        if down == '2' or down == '-1':
+        if self.x == H-1:
+            # can't down
             possible.remove(3)
+
+        left = board.getCell([self.x, self.y-1])
+        if left == '2':
+            if 0 in possible:
+                possible.remove(0)
+        right = board.getCell([self.x, self.y+1])
+        if right == '2':
+            if 1 in possible:
+                possible.remove(1)
+        up = board.getCell([self.x-1, self.y])
+        if up == '2':
+            if 2 in possible:
+                possible.remove(2)
+        down = board.getCell([self.x+1, self.y])
+        if down == '2':
+            if 3 in possible:
+                possible.remove(3)
 
         # use Q
         curr_state = board.calcState(self.x, self.y)
@@ -19300,7 +19317,7 @@ class Bot():
 
         # Prevent reversing and out of board
         # If still hard-headed go to death -> random (not fatal)
-        if [move, self.last_action] in FATAL_MOVES:
+        if ([move, self.last_action] in FATAL_MOVES) or (move not in possible):
             possible = filter(lambda a: [a, self.last_action] not in FATAL_MOVES, possible)
             move = random.choice(possible)
 
