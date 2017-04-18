@@ -14552,7 +14552,7 @@ FATAL_MOVES = [
 #}
 
 POINTS = {
-    '-1': 1000, # Oppo + Out of board (-2 => -1)
+    '-1': 100, # Oppo + Out of board (-2 => -1)
     '0' : 10,   # Empty + Oppo's stable (3 => 0)
     '1' : 10,   # Stable
     '2' : 50,   # Unstable
@@ -14562,7 +14562,7 @@ POINTS = {
 
 
 # Vision
-SIGHT = 4
+SIGHT = 3
 
 class Board():
     def __init__(self):

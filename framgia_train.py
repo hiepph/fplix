@@ -56,7 +56,7 @@ KILLED_POINT = -50
 EPSILON = 0.2
 
 # Vision
-SIGHT = 4
+SIGHT = 3
 
 from q import Q
 
