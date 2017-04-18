@@ -63,9 +63,9 @@ from q import Q
 def dump_q(q, n):
     f = open('q_%d' % n, 'wb')
     for k, v in q.iteritems():
-        f.write('    ')
+        f.write('')
         f.write(str(k))
-        f.write(': ')
+        f.write(':')
         f.write(str(v))
         f.write(',\n')
     f.close()
