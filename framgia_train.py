@@ -23,13 +23,21 @@ ACTIONS = {
 }
 
 # Value points
+#POINTS = {
+#    '-2': 1000, # Oppo
+#    '-1': 100,  # Out of board
+#    '0' : 10,   # Empty
+#    '1' : 10,   # Stable
+#    '2' : 50,   # Unstable
+#    '3' : 15,   # Oppo's stable
+#    '4' : 50    # Oppo's unstable
+#}
+
 POINTS = {
-    '-2': 1000, # Oppo
-    '-1': 100,  # Out of board
-    '0' : 10,   # Empty
+    '-1': 1000, # Oppo + Out of board (-2 => -1)
+    '0' : 10,   # Empty + Oppo's stable (3 => 0)
     '1' : 10,   # Stable
     '2' : 50,   # Unstable
-    '3' : 15,   # Oppo's stable
     '4' : 50    # Oppo's unstable
 }
 
@@ -48,7 +56,7 @@ KILLED_POINT = -50
 EPSILON = 0.2
 
 # Vision
-SIGHT = 5
+SIGHT = 4
 
 from q import Q
 
@@ -111,12 +119,12 @@ class Board():
         if value in ['0', '1', '2']:
             return value
         elif value in ['3', '5', '7']:
-            return '3'
+            return '0'
         elif value in ['4', '6', '8']:
             return '4'
         else:
             # opponents
-            return '-2'
+            return '-1'
 
     def getRadar(self, cells):
         points = {}
@@ -187,15 +195,16 @@ class Board():
             if last_value == '0':
                 return EMPTY_POINT
             # Expand region (oppo)
-            elif last_value == '3':
-                return OPPO_STABLE_POINT
+            #elif last_value == '3':
+                #return OPPO_STABLE_POINT
             # Kill
-            elif last_value == '4' or last_value == '-2':
+            #elif last_value == '4' or last_value == '-2':
+            elif last_value == '4' or last_value == '-1':
                 return KILL_POINT
             else:
                 return FATAL_POINT
-        elif value == '-2':
-            return KILLED_POINT
+        #elif value == '-2':
+            #return KILLED_POINT
         else:
             return (bot.score - bot.last_score) * BOOST_POINT
 
