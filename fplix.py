@@ -14719,6 +14719,10 @@ class Bot():
             possible = filter(lambda a: [a, self.last_action] not in FATAL_MOVES, possible)
             move = random.choice(possible)
 
+        # Last try
+        if move is None:
+            move = random.choice([0, 1, 2, 3])
+
         # Update last move
         self.last_action = move
 
