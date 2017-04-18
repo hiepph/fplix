@@ -181,8 +181,6 @@ class Board():
         if value == '-1':
             board.done = True
             return FATAL_POINT
-        elif value == '1':
-            return (bot.score - bot.last_score) * BOOST_POINT
         elif value == '2':
             last_value = self.getCell([bot.x, bot.y], past=True)
             # Expand region (empty)
@@ -196,6 +194,10 @@ class Board():
                 return KILL_POINT
             else:
                 return FATAL_POINT
+        elif value == '3':
+            return KILLED_POINT
+        else:
+            return (bot.score - bot.last_score) * BOOST_POINT
 
 
 class Bot():
@@ -240,7 +242,7 @@ def main():
     bot = Bot(1)
 
     games = os.listdir('crawl')
-    for e, game in enumerate(games[:EPOCH]):
+    for e, game in enumerate(games[EPOCH]):
         print '---> %s' % game
         f = open('crawl/' + game, 'r')
 
@@ -322,7 +324,7 @@ def main():
 
     f.close()
 
-    if (e+1) % 1000 == 0:
+    if (e+1) % 100 == 0:
         dump_q(bot.ai.q, e+1)
 
 if __name__ == '__main__':
