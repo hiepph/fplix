@@ -242,7 +242,7 @@ def main():
     bot = Bot(1)
 
     games = os.listdir('crawl')
-    for e, game in enumerate(games[EPOCH]):
+    for e, game in enumerate(games[:EPOCH]):
         print '---> %s' % game
         f = open('crawl/' + game, 'r')
 
