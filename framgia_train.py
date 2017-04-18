@@ -194,7 +194,7 @@ class Board():
                 return KILL_POINT
             else:
                 return FATAL_POINT
-        elif value == '4':
+        elif value == '-2':
             return KILLED_POINT
         else:
             return (bot.score - bot.last_score) * BOOST_POINT
