@@ -14468,11 +14468,6 @@ Q_TRAINED = {
 }
 
 
-try:
-    EPOCH = int(os.getenv('EPOCH'))
-except:
-    EPOCH = 10462
-
 # Board
 W = 30
 H = 20
@@ -14715,7 +14710,7 @@ def main():
     bot.ai.q = Q_TRAINED
 
     games = os.listdir('crawl')
-    for e, game in enumerate(games[:EPOCH]):
+    for e, game in enumerate(games):
         print '---> %s' % game
         f = open('crawl/' + game, 'r')
 
