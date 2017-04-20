@@ -8,7 +8,7 @@
 
 + `play.py`: Bot trained with `self_train.py` with 20k games
 
-+ `framgia_train.py`: Learning with 22k games crawled from https://aicontest.framgia.vn/index
++ `framgia_train.py`: Learning with more than 12k games crawled from https://aicontest.framgia.vn/index
 
 + `fplix.py`: Bot trained with `framgia_train.py`
 
